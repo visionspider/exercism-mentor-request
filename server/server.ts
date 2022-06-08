@@ -1,8 +1,9 @@
 "use strict";
 import express from "express";
 import morgan from "morgan";
+import "dotenv/config";
 import { getMentorReq, createStackChannels } from "./handler";
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 express()
   .use(function (req, res, next) {
@@ -25,4 +26,5 @@ express()
   // REST endpoints?
   .get("/get-mentor-request", getMentorReq)
   .get("/create-stack-channels", createStackChannels)
+  .get("/ping", (req, res) => res.status(200).json("I'm alive"))
   .listen(PORT, () => console.info(`Listening on port ${PORT}`));

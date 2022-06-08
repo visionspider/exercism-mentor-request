@@ -15,11 +15,12 @@
   },
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server/server.ts",
   "author": "David Guillaumant-Mergler",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "start": "nodemon server.ts"
+    "start": "node ./build/server.js",
+    "dev": "nodemon ./server/server.ts",
+    "postinstall": "tsc"
   }
 }
