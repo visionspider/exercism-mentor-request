@@ -1,17 +1,5 @@
-interface Student {
-  uuid: string;
-  track_title: string;
-  exercise_icon_url: string;
-  exercise_title: string;
-  student_handle: string;
-  student_avatar_url: string;
-  updated_at: string;
-  have_mentored_previously: boolean;
-  is_favorited: boolean;
-  status: null;
-  tooltip_url: string;
-  url: string;
-}
+import { Student } from "./interface";
+
 export const createPayload = (slug: string, student: Student) => {
   if (student) {
     const {
@@ -33,7 +21,7 @@ export const createPayload = (slug: string, student: Student) => {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `*Student needs help in ${track_title}*`,
+                text: `*A Student needs help*`,
               },
             },
             {
