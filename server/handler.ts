@@ -92,7 +92,7 @@ const removeUUID = async (students: any[]) => {
     Promise.all(
       reqList.map(async (studentReq: StudentRequest) => {
         const { _id } = studentReq;
-        if (students.find((student) => student.uuid !== _id)) {
+        if (!students.find((student) => student.uuid === _id)) {
           await DB.collection(REQUEST).deleteOne({ _id });
         }
       })

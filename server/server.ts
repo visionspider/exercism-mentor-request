@@ -23,8 +23,9 @@ express()
   .use(express.urlencoded({ extended: false }))
   .use("/", express.static(__dirname + "/"))
 
-  // REST endpoints?
+  // REST endpoints
   .get("/get-mentor-request", getMentorReq)
   .get("/create-stack-channels", createStackChannels)
   .get("/ping", (req, res) => res.status(200).json("I'm alive"))
+  //
   .listen(PORT, () => console.info(`Listening on port ${PORT}`));
