@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 
 export interface StudentRequest {
   _id?: ObjectId;
+  uuid: string;
   timestamp?: number;
 }
 

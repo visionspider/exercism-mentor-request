@@ -2,6 +2,7 @@ import "dotenv/config";
 
 export const expectEnv = (key: string) => {
   const val = process.env[key];
+
   if (!val)
     throw new Error(`Expected ${key} environment variable to be defined`);
   return val;

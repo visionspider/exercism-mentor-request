@@ -15,13 +15,12 @@ import {
 const CONFIG = {
   headers: { Authorization: `Bearer ${EXERCISM_TOKEN}` },
 };
-const OPTIONS = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
+// const OPTIONS = {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// };
 
-const CLIENT: MongoClient = new MongoClient(MONGO_URI, OPTIONS);
-const DB: Db = CLIENT.db(DB_NAME);
+const CLIENT: MongoClient = new MongoClient(MONGO_URI);
 
 const getTracksList = async () => {
   try {
@@ -34,7 +33,7 @@ const getTracksList = async () => {
       return slugsList;
     }
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 37 ERROR = ", err);
   } finally {
   }
 };
@@ -51,25 +50,26 @@ const checkTimestamp = (timestamp: number) => {
   }
 };
 
-const addUUIDToDB = async (_id: string) => {
+const addUUIDToDB = async (uuid: string, DB: Db) => {
   const timestamp: number = +new Date();
 
   return await DB.collection(REQUEST).insertOne({
-    _id: new ObjectId(_id),
+    uuid,
     timestamp,
   });
 };
 
 //Check with DB if UUID already exist
-const checkUUID = async (student: Student) => {
+const checkUUID = async (student: Student, DB: Db) => {
   try {
-    const _id: string = student.uuid;
-    const studentReq = await DB.collection(REQUEST).findOne({ _id });
+    const uuid: string = student.uuid;
+    console.log("LINE 66 = ", uuid);
+    const studentReq = await DB.collection(REQUEST).findOne({ uuid });
 
     if (studentReq) {
       if (checkTimestamp(studentReq.timestamp)) {
         await DB.collection(REQUEST).updateOne(
-          { _id },
+          { uuid },
           { $set: { timestamp: +new Date() } }
         );
         return true;
@@ -77,37 +77,38 @@ const checkUUID = async (student: Student) => {
         return false;
       }
     } else {
-      const isAdded = addUUIDToDB(_id);
+      const isAdded = addUUIDToDB(uuid, DB);
       return isAdded;
     }
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
   }
 };
 
 //LOOP through
-const removeUUID = async (students: any[]) => {
+const removeUUID = async (students: any[], DB: Db) => {
   try {
     const reqList: any[] = await DB.collection(REQUEST).find().toArray();
     Promise.all(
       reqList.map(async (studentReq: StudentRequest) => {
-        const { _id } = studentReq;
-        if (!students.find((student) => student.uuid === _id)) {
-          await DB.collection(REQUEST).deleteOne({ _id });
+        const { uuid } = studentReq;
+        if (!students.find((student) => student.uuid === uuid)) {
+          await DB.collection(REQUEST).deleteOne({ uuid });
         }
       })
     );
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
   }
 };
 
 const postMsgToSlack = async (slug: string, students: any[]) => {
-  await CLIENT.connect();
   try {
-    await removeUUID(students);
+    const DB: Db = CLIENT.db(DB_NAME);
+
+    await removeUUID(students, DB);
     students.forEach(async (student) => {
-      if (await checkUUID(student)) {
+      if (await checkUUID(student, DB)) {
         const payload = createPayload(slug, student);
         await axios
           .post(
@@ -126,14 +127,13 @@ const postMsgToSlack = async (slug: string, students: any[]) => {
           )
           .then((res) => res)
           .catch((err) => {
-            console.log("ERROR = ", err);
+            console.log("LINE 129 ERROR = ", err);
           });
       }
     });
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 134 ERROR = ", err);
   } finally {
-    CLIENT.close();
   }
 };
 
@@ -157,6 +157,7 @@ export const getMentorReq = async (req: Request, res: Response) => {
   try {
     const slugsList = await getTracksList();
 
+    await CLIENT.connect();
     const result = await Promise.all(slugsList.map(checkMentorRequest));
 
     res.status(200).json({
@@ -165,8 +166,9 @@ export const getMentorReq = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 168 ERROR = ", err);
   } finally {
+    await CLIENT.close();
   }
 };
 export const createStackChannels = async (req: Request, res: Response) => {
@@ -197,7 +199,7 @@ export const createStackChannels = async (req: Request, res: Response) => {
           )
           .then((res) => res)
           .catch((err) => {
-            console.log("ERROR = ", err);
+            console.log("LINE 200 ERROR = ", err);
           });
 
         return response?.data.channel;
@@ -210,7 +212,7 @@ export const createStackChannels = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.log("ERROR = ", err);
+    console.log("LINE 213 ERROR = ", err);
   } finally {
   }
 };
