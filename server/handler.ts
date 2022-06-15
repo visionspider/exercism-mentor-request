@@ -63,7 +63,7 @@ const addUUIDToDB = async (uuid: string, DB: Db) => {
 const checkUUID = async (student: Student, DB: Db) => {
   try {
     const uuid: string = student.uuid;
-    console.log("LINE 66 = ", uuid);
+    // console.log("LINE 66 = ", uuid);
     const studentReq = await DB.collection(REQUEST).findOne({ uuid });
 
     if (studentReq) {
@@ -81,7 +81,7 @@ const checkUUID = async (student: Student, DB: Db) => {
       return isAdded;
     }
   } catch (err) {
-    console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
+    // console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
   }
 };
 
@@ -89,7 +89,7 @@ const checkUUID = async (student: Student, DB: Db) => {
 const removeUUID = async (students: any[], DB: Db) => {
   try {
     const reqList: any[] = await DB.collection(REQUEST).find().toArray();
-    Promise.all(
+    await Promise.all(
       reqList.map(async (studentReq: StudentRequest) => {
         const { uuid } = studentReq;
         if (!students.find((student) => student.uuid === uuid)) {
@@ -98,7 +98,7 @@ const removeUUID = async (students: any[], DB: Db) => {
       })
     );
   } catch (err) {
-    console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
+    // console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
   }
 };
 
@@ -158,8 +158,8 @@ export const getMentorReq = async (req: Request, res: Response) => {
     const slugsList = await getTracksList();
 
     await CLIENT.connect();
-    const result = await Promise.all(slugsList.map(checkMentorRequest));
 
+    const result = await Promise.all(slugsList.map(checkMentorRequest));
     res.status(200).json({
       status: 200,
       message: "success",
@@ -168,7 +168,7 @@ export const getMentorReq = async (req: Request, res: Response) => {
   } catch (err) {
     console.log("LINE 168 ERROR = ", err);
   } finally {
-    await CLIENT.close();
+    CLIENT.close();
   }
 };
 export const createStackChannels = async (req: Request, res: Response) => {
@@ -216,3 +216,8 @@ export const createStackChannels = async (req: Request, res: Response) => {
   } finally {
   }
 };
+
+//Removing await CLIENT.close(); fixes the issue
+//it seems like client is closing connection before completing DB queries
+//Look into this error: UnhandledPromiseRejectionWarning: MongoExpiredSessionError: Cannot use a session that has ended at applySession
+//Look into this error: mongodb.close is not waiting for finally
