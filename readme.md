@@ -40,7 +40,7 @@ _Follow instructions below._
       <img src="./server/assets/slack-instruc5.png" alt="Bot token scopes image" height="100%" width="100%">
    5. Scroll down to Scopes under Bot Token Scopes. Select dropdown "Add permissions by Scope or API method...".
       Give the bot these permissions in Bot Token Scopes : channels:join, channels:manage, chat:write and groups:write.
-      For more info: [https://api.slack.com/methods/chat.delete](Slack Delete Method), [https://api.slack.com/methods/conversations.create](Slack Create Conversation Method), [https://api.slack.com/methods/chat.postMessage](Slack Post Message Method)
+      For more info: [Slack Delete Method](https://api.slack.com/methods/chat.delete), [https://api.slack.com/methods/conversations.create](Slack Create Conversation Method), [https://api.slack.com/methods/chat.postMessage](Slack Post Message Method)
       <img src="./server/assets/slack-instruc6.png" alt="OAuth Tokens image" height="100%" width="100%">
    6. Scroll up and under OAuth Tokens for Your Workspace click Install to Workspace. Then click Allow.
       <img src="./server/assets/slack-instruc7.png" alt="Copy OAuth Token image" height="100%" width="100%">
