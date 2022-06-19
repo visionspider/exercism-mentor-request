@@ -1,8 +1,8 @@
 <!-- GETTING STARTED -->
+<div id="top"></div>
 
 ## Getting Started
 
-<div id="top"></div>
 To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
