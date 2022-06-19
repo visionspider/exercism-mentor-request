@@ -81,7 +81,7 @@ const checkUUID = async (student: Student, DB: Db) => {
       return isAdded;
     }
   } catch (err) {
-    // console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
+    console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
   }
 };
 
@@ -98,7 +98,7 @@ const removeUUID = async (students: any[], DB: Db) => {
       })
     );
   } catch (err) {
-    // console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
+    console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
   }
 };
 
