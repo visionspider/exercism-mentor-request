@@ -30,7 +30,7 @@ _Follow instructions below._
 1. Create a slack App [https://api.slack.com/apps](https://api.slack.com/apps) (Prerequisites: Have a workspace and a slack account)
    <img src="./server/assets/slack-instruc1.png" alt="Create New App image" height="100%" width="100%">
 
-   1. ==Click Create New App.==
+   1. `Click Create New App.`
       <img src="./server/assets/slack-instruc2.png" alt="From Scratch image" height="100%" width="100%">
    2. Click From Scratch.
       <img src="./server/assets/slack-instruc3.png" alt="Enter app details image" height="100%" width="100%">
@@ -39,7 +39,7 @@ _Follow instructions below._
    4. Select Permissions.
       <img src="./server/assets/slack-instruc5.png" alt="Bot token scopes image" height="100%" width="100%">
    5. Scroll down to Scopes under Bot Token Scopes. Select dropdown "Add permissions by Scope or API method...".
-      Give the bot these permissions in Bot Token Scopes : channels:join, channels:manage, chat:write and groups:write.
+      Give the bot these permissions in Bot Token Scopes : _channels:join_, _channels:manage_, _chat:write_ and _groups:write_.
       For more info: [Slack Delete Method](https://api.slack.com/methods/chat.delete), [Slack Create Conversation Method](https://api.slack.com/methods/conversations.create), [Slack Post Message Method](https://api.slack.com/methods/chat.postMessage)
       <img src="./server/assets/slack-instruc6.png" alt="OAuth Tokens image" height="100%" width="100%">
    6. Scroll up and under OAuth Tokens for Your Workspace click Install to Workspace. Then click Allow.
