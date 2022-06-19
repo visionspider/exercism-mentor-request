@@ -32,19 +32,19 @@ _Follow instructions below._
 
    1. `Click Create New App.`
       <img src="./server/assets/slack-instruc2.png" alt="From Scratch image" height="100%" width="100%">
-   2. Click From Scratch.
+   2. `Click From Scratch.`
       <img src="./server/assets/slack-instruc3.png" alt="Enter app details image" height="100%" width="100%">
-   3. Enter App Name and select Workspace to add App to.
+   3. `Enter App Name and select Workspace to add App to.`
       <img src="./server/assets/slack-instruc4.png" alt="select permissions image" height="100%" width="100%">
-   4. Select Permissions.
+   4. `Select Permissions.`
       <img src="./server/assets/slack-instruc5.png" alt="Bot token scopes image" height="100%" width="100%">
-   5. Scroll down to Scopes under Bot Token Scopes. Select dropdown "Add permissions by Scope or API method...".
-      Give the bot these permissions in Bot Token Scopes : _channels:join_, _channels:manage_, _chat:write_ and _groups:write_.
+   5. `Scroll down to Scopes under Bot Token Scopes. Select dropdown "Add permissions by Scope or API method...".`
+      `Give the bot these permissions in Bot Token Scopes : _channels:join_, _channels:manage_, _chat:write_ and _groups:write_.`
       For more info: [Slack Delete Method](https://api.slack.com/methods/chat.delete), [Slack Create Conversation Method](https://api.slack.com/methods/conversations.create), [Slack Post Message Method](https://api.slack.com/methods/chat.postMessage)
       <img src="./server/assets/slack-instruc6.png" alt="OAuth Tokens image" height="100%" width="100%">
-   6. Scroll up and under OAuth Tokens for Your Workspace click Install to Workspace. Then click Allow.
+   6. `Scroll up and under OAuth Tokens for Your Workspace click Install to Workspace. Then click Allow.`
       <img src="./server/assets/slack-instruc7.png" alt="Copy OAuth Token image" height="100%" width="100%">
-   7. Save the Bot User OAuth Token for later.
+   7. `Save the Bot User OAuth Token for later.`
 
       <img src="./server/assets/exercism-instruc1.png" alt="Exercism Token image" height="100%" width="100%">
 
