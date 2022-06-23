@@ -2,7 +2,12 @@
 import express from "express";
 import morgan from "morgan";
 import "dotenv/config";
-import { getMentorReq, createStackChannels } from "./handler";
+import {
+  getMentorReq,
+  createStackChannels,
+  testPostToSlack,
+  testDeleteSlackMsg,
+} from "./handler";
 const PORT = process.env.PORT || 4000;
 
 express()
@@ -27,5 +32,7 @@ express()
   .get("/get-mentor-request", getMentorReq)
   .get("/create-stack-channels", createStackChannels)
   .get("/ping", (req, res) => res.status(200).json("I'm alive"))
+  .post("/post", testPostToSlack)
+  .delete("/delete", testDeleteSlackMsg)
   //
   .listen(PORT, () => console.info(`Listening on port ${PORT}`));

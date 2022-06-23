@@ -3,7 +3,8 @@ import { ObjectId } from "mongodb";
 export interface StudentRequest {
   _id?: ObjectId;
   uuid: string;
-  timestamp?: number;
+  ts?: number;
+  channel: string;
 }
 
 export interface DB_OPTIONS {

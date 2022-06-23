@@ -38,7 +38,7 @@ const getTracksList = async () => {
   }
 };
 //Check with DB if Timestamp has passed threshold
-const checkTimestamp = (timestamp: number) => {
+export const checkTimestamp = (timestamp: number) => {
   //MODIFY THE AMOUNT OF TIME IN MS TO CHANGE WHEN A STUDENT REQUEST NEEDS TO BE REPOSTED
   //(CURRENTLY 5 DAYS)
   const TIME_THRESHOLD: number = 432000000;
@@ -50,38 +50,78 @@ const checkTimestamp = (timestamp: number) => {
   }
 };
 
-const addUUIDToDB = async (uuid: string, DB: Db) => {
-  const timestamp: number = +new Date();
-
-  return await DB.collection(REQUEST).insertOne({
-    uuid,
-    timestamp,
-  });
-};
-
 //Check with DB if UUID already exist
 const checkUUID = async (student: Student, DB: Db) => {
   try {
     const uuid: string = student.uuid;
     // console.log("LINE 66 = ", uuid);
     const studentReq = await DB.collection(REQUEST).findOne({ uuid });
-
+    const checkResults = { postMsg: false, type: "" };
     if (studentReq) {
-      if (checkTimestamp(studentReq.timestamp)) {
-        await DB.collection(REQUEST).updateOne(
-          { uuid },
-          { $set: { timestamp: +new Date() } }
-        );
-        return true;
+      if (checkTimestamp(studentReq.ts)) {
+        checkResults.postMsg = true;
+        checkResults.type = "update";
+        return checkResults;
       } else {
-        return false;
+        return checkResults;
       }
     } else {
-      const isAdded = addUUIDToDB(uuid, DB);
-      return isAdded;
+      checkResults.postMsg = true;
+      checkResults.type = "create";
+
+      return checkResults;
     }
   } catch (err) {
-    console.log("LINE 84 ERROR = ", err); //ERROR HERE currently
+    console.log("LINE 84 ERROR = ", err);
+  }
+};
+const addUUIDToDB = async (
+  uuid: string,
+  DB: Db,
+  ts: number,
+  channel: string
+) => {
+  return await DB.collection(REQUEST).insertOne({
+    uuid,
+    ts,
+    channel,
+  });
+};
+
+const updateUUID = async (
+  uuid: string,
+  DB: Db,
+  ts: number,
+  channel: string
+) => {
+  await deleteSlackMsg(channel, ts + "");
+  return await DB.collection(REQUEST).updateOne({ uuid }, { $set: { ts } });
+};
+
+const deleteSlackMsg = async (channel: string, ts: string) => {
+  try {
+    const response = await axios
+      .post(
+        "https://slack.com/api/chat.delete",
+        JSON.stringify({ channel, ts }),
+        {
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Content-Length": new TextEncoder().encode(
+              JSON.stringify({ channel, ts })
+            ).length,
+            Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((res) => res)
+      .catch((err) => {
+        console.log("LINE 114 ERROR = ", err);
+      });
+    console.log(response);
+  } catch (err) {
+    console.log(err);
   }
 };
 
@@ -91,14 +131,15 @@ const removeUUID = async (students: any[], DB: Db) => {
     const reqList: any[] = await DB.collection(REQUEST).find().toArray();
     await Promise.all(
       reqList.map(async (studentReq: StudentRequest) => {
-        const { uuid } = studentReq;
+        const { uuid, channel, ts } = studentReq;
         if (!students.find((student) => student.uuid === uuid)) {
+          await deleteSlackMsg(channel, ts + "");
           await DB.collection(REQUEST).deleteOne({ uuid });
         }
       })
     );
   } catch (err) {
-    console.log("LINE 101 ERROR = ", err); //ERROR HERE currently
+    console.log("LINE 101 ERROR = ", err);
   }
 };
 
@@ -108,9 +149,10 @@ const postMsgToSlack = async (slug: string, students: any[]) => {
 
     await removeUUID(students, DB);
     students.forEach(async (student) => {
-      if (await checkUUID(student, DB)) {
+      const checkResults = await checkUUID(student, DB);
+      if (checkResults?.postMsg) {
         const payload = createPayload(slug, student);
-        await axios
+        const result = await axios
           .post(
             "https://slack.com/api/chat.postMessage",
             JSON.stringify(payload),
@@ -129,6 +171,16 @@ const postMsgToSlack = async (slug: string, students: any[]) => {
           .catch((err) => {
             console.log("LINE 129 ERROR = ", err);
           });
+        if (result?.data.ok) {
+          const uuid: string = student.uuid;
+          const { ts, channel } = result?.data;
+
+          checkResults.type === "create"
+            ? addUUIDToDB(uuid, DB, +ts * 1000, channel)
+            : checkResults.type === "update"
+            ? updateUUID(uuid, DB, +ts * 1000, channel)
+            : null;
+        }
       }
     });
   } catch (err) {
@@ -171,6 +223,7 @@ export const getMentorReq = async (req: Request, res: Response) => {
     CLIENT.close();
   }
 };
+
 export const createStackChannels = async (req: Request, res: Response) => {
   try {
     const slugsList = await getTracksList();
@@ -217,7 +270,66 @@ export const createStackChannels = async (req: Request, res: Response) => {
   }
 };
 
-//Removing await CLIENT.close(); fixes the issue
-//it seems like client is closing connection before completing DB queries
-//Look into this error: UnhandledPromiseRejectionWarning: MongoExpiredSessionError: Cannot use a session that has ended at applySession
-//Look into this error: mongodb.close is not waiting for finally
+export const testDeleteSlackMsg = async (req: Request, res: Response) => {
+  try {
+    const { body } = req;
+    const response = await axios
+      .post("https://slack.com/api/chat.delete", JSON.stringify(body), {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Content-Length": new TextEncoder().encode(JSON.stringify(body))
+            .length,
+          Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+          Accept: "application/json",
+        },
+      })
+      .then((res) => res)
+      .catch((err) => {
+        console.log("LINE 129 ERROR = ", err);
+      });
+    console.log(response);
+    res.status(200).json({
+      status: 200,
+      message: "success",
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+export const testPostToSlack = async (req: Request, res: Response) => {
+  const { slug, students }: { slug: string; students: any[] } = req.body;
+  try {
+    const result = Promise.all(
+      students.map(async (student) => {
+        const payload = createPayload(slug, student);
+        const response = await axios
+          .post(
+            "https://slack.com/api/chat.postMessage",
+            JSON.stringify(payload),
+            {
+              headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                "Content-Length": new TextEncoder().encode(
+                  JSON.stringify(payload)
+                ).length,
+                Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+                Accept: "application/json",
+              },
+            }
+          )
+          .then((res) => res)
+          .catch((err) => {
+            console.log("LINE 129 ERROR = ", err);
+          });
+        console.log(response?.data);
+      })
+    );
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
